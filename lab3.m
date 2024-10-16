@@ -1,47 +1,50 @@
-% CPE 0415 – DIGITAL SIGNAL PROCESSING
-% LABORATORY ACTIVITY
-% Title: ANALOG TO DIGITAL CONVERSION (ADC)
-% Name: [Your Name]
-% Student Number: [Your Student Number]
-% Section: [Your Section]
-% Date: [Current Date]
+% Author: [Your Name]
+% MATLAB script to analyze and process an analog signal
 
-% Clear workspace and command window
-clear;
-clc;
-
-% Input Section
+% User inputs
 T = input('Enter the time duration in seconds (T): ');
 Fs = input('Enter the sampling frequency (Fs): ');
-n = input('Enter the number of bits of coding (n): ');
+n_bits = input('Enter the number of bits of coding: ');
 
-% Signal Definition
+% Signal parameters
 A = 1; % Amplitude
 F = 1; % Frequency
-t = 0:1/Fs:T; % Time vector
+
+% Time vector
+t = 0:1/Fs:T;
+
+% Analog signal
 x_t = A * (0.8 * sin(2 * pi * F * t) + 1.2 * cos(2 * pi * 0.7 * F * t));
 
-% Calculations
-Nyquist_rate = 2 * F;
-normalized_frequencies = [F/Fs, 0.7*F/Fs];
-quantization_levels = 2^n;
-dynamic_range = 6.02 * n + 1.76;
-SQNR = 1.76 + 6.02 * n;
-RMS_noise = A / sqrt(12 * quantization_levels^2);
+% Nyquist rate
+nyquist_rate = 2 * F;
 
-% Signal Processing
-% Analog signal is already defined as x_t
-% Discrete-Time Signal
-x_n = x_t;
+% Normalized frequencies
+normalized_freq = F / Fs;
 
-% Quantized Discrete-Time Signal
-x_q = round(x_n * quantization_levels) / quantization_levels;
+% Number of quantization levels
+L = 2^n_bits;
 
-% Quantization Noise
-quantization_noise = x_n - x_q;
+% Dynamic range
+dynamic_range = 20 * log10(L);
 
-% Recovered Analog Signal
-recovered_signal = x_q;
+% Quantization step size
+delta = (max(x_t) - min(x_t)) / L;
+
+% Quantized signal
+x_q = round(x_t / delta) * delta;
+
+% Quantization noise
+quantization_noise = x_t - x_q;
+
+% Signal-to-Quantization-Noise Ratio (SQNR)
+sqnr = 10 * log10(mean(x_t.^2) / mean(quantization_noise.^2));
+
+% RMS Noise
+rms_noise = sqrt(mean(quantization_noise.^2));
+
+% Recovered analog signal (simple zero-order hold)
+x_recovered = x_q;
 
 % Plotting
 figure;
@@ -51,7 +54,7 @@ xlabel('Time (s)');
 ylabel('Amplitude');
 
 figure;
-stem(t, x_n);
+stem(t, x_t);
 title('Discrete-Time Signal');
 xlabel('Time (s)');
 ylabel('Amplitude');
@@ -69,17 +72,33 @@ xlabel('Time (s)');
 ylabel('Amplitude');
 
 figure;
-plot(t, recovered_signal);
+plot(t, x_recovered);
 title('Recovered Analog Signal');
 xlabel('Time (s)');
 ylabel('Amplitude');
 
-% Conclusion and Discussion
-fprintf('Nyquist rate: %.2f Hz\n', Nyquist_rate);
-fprintf('Normalized frequencies: %.2f, %.2f\n', normalized_frequencies);
-fprintf('Number of Quantization Levels: %d\n', quantization_levels);
+% Display results
+fprintf('Nyquist rate: %.2f Hz\n', nyquist_rate);
+fprintf('Normalized frequency: %.2f\n', normalized_freq);
+fprintf('Number of quantization levels: %d\n', L);
 fprintf('Dynamic range: %.2f dB\n', dynamic_range);
-fprintf('SQNR: %.2f dB\n', SQNR);
-fprintf('RMS Noise: %.2f\n', RMS_noise);
+fprintf('SQNR: %.2f dB\n', sqnr);
+fprintf('RMS Noise: %.2f\n', rms_noise);
 
-% Observations and discussions should be written based on the results obtained.
+% Conclusion and discussion
+disp('Conclusion:');
+disp('Observe the changes in the input values and their effect on the results.');
+
+disp('Discussion:');
+disp('a) The sampling frequency affects the resolution of the discrete-time signal.');
+disp('b) The number of bits of coding affects the quantization levels and dynamic range.');
+disp('c) The Nyquist rate is twice the maximum frequency of the signal.');
+disp('d) Normalized frequencies are the actual frequencies divided by the sampling frequency.');
+disp('e) The number of quantization levels is determined by the number of bits.');
+disp('f) Dynamic range is the ratio of the largest to smallest signal levels.');
+disp('g) SQNR is the ratio of signal power to quantization noise power.');
+disp('h) RMS Noise is the root mean square of the quantization noise.');
+disp('i) The analog signal is the continuous signal.');
+disp('j) The discrete-time signal is the sampled version of the analog signal.');
+disp('k) The quantized discrete-time signal is the digitized version of the discrete-time signal.');
+disp('l) Quantization noise is the difference between the analog signal and the quantized signal.');
